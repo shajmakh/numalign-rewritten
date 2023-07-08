@@ -1,2 +1,2 @@
 # numalign-rewritten
-rewrite ffromani/numalign
+rewrite ffromani/numalign for self experiment.
