@@ -8,6 +8,8 @@ import (
 	"os"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
+	. "github.com/shajmakh/numaalign-rewritten/internal/cpu"
+
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
 
