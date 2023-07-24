@@ -21,8 +21,8 @@ func TestCheckNumaCpuMapping(t *testing.T) {
 	}{
 		{numaCpuMap, getCpuset("0-2"), 1},
 		{numaCpuMap, getCpuset("5"), 0},
-		{numaCpuMap, getCpuset("1,5,9,12"), -1},
-		{numaCpuMap, getCpuset("0-2,1,5"), -1},
+		{numaCpuMap, getCpuset("1,5,9,12"), -1}, //negative
+		{numaCpuMap, getCpuset("0-2,1,5"), -1},  //negative
 	}
 
 	for _, c := range testCases {

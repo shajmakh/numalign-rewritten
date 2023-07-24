@@ -14,6 +14,7 @@ const (
 	sysFsCgroupCpusetCpusPath = "/sys/fs/cgroup/cpuset/cpuset.cpus"
 )
 
+// GetConsumedCpusBy returns the consumed cpuset by a proccess
 func GetConsumedCpusBy() (cpuset.CPUSet, error) {
 	var consumedCpuset cpuset.CPUSet
 	out, err := exec.Command("cat", sysFsCgroupCpusetCpusPath).Output()
@@ -29,15 +30,14 @@ func GetConsumedCpusBy() (cpuset.CPUSet, error) {
 	return consumedCpuset, nil
 }
 
+// CheckCpuAlignment checks if cpus consumed by a process are aligned to a single numa node
 func CheckCpuAlignment(output *NumaAlignmentOutput) {
-
-	//get numa->cpuset map
 	numaToCpuset, err := GetNumaCpuMapping()
 	if err != nil {
 		output.Err = err
 		return
 	}
-	//get consumed cpus
+
 	consumedCpuset, err := GetConsumedCpusBy() //TODO send pid
 	if err != nil {
 		output.Err = err
@@ -45,19 +45,17 @@ func CheckCpuAlignment(output *NumaAlignmentOutput) {
 	}
 	output.ProccessResources.CPUs = consumedCpuset
 
-	// check mapping
 	CheckNumaCpuMapping(numaToCpuset, consumedCpuset, *output)
 }
 
+// CheckNumaCpuMapping checks if a cpuset is mapped to a numa and returns that numa
 func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpuset.CPUSet, output NumaAlignmentOutput) int {
 	for idx, allocatedCpuset := range numaToCpuset {
 		if consumedCpuset.IsSubsetOf(allocatedCpuset) {
 			if output.NNode != -1 && output.NNode != idx {
-				output.IsAligned = false
 				output.NNode = -1
 				break
 			}
-			output.IsAligned = true //the process may consume only this resource type, so it is aligned hence true
 			output.NNode = idx
 			break
 		}

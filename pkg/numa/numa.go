@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	// cmdNumaCount = "lscpu --json |jq '.[] | .[] | select(.field==\"NUMA node(s):\")| .data'"
 	sysDevicesSystemNodePath = "/sys/devices/system/node/"
 )
 
@@ -30,6 +29,7 @@ func GetNumaCount() (int, error) {
 	return len(nnodes), nil
 }
 
+// GetNumasList return list of numa nodes names
 func GetNumasList() ([]string, error) {
 	out, err := exec.Command("ls", sysDevicesSystemNodePath).Output()
 	if err != nil {
@@ -42,6 +42,7 @@ func GetNumasList() ([]string, error) {
 	return nnodes, nil
 }
 
+// GetNumaCpuMapping return cpuset -> numa mapping, e.g node0: {0,5-8,12}
 func GetNumaCpuMapping() (map[int]cpuset.CPUSet, error) {
 	numaToCpu := make(map[int]cpuset.CPUSet)
 
