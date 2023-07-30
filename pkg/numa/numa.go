@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
@@ -28,6 +29,7 @@ import (
 
 const (
 	sysDevicesSystemNodePath = "/sys/devices/system/node/"
+	sysBusPciDevicePath      = "/sys/bus/pci/devices"
 )
 
 // GetNumaCount returns the numa node's count on the system
@@ -69,7 +71,7 @@ func GetNumaCpuMapping() (map[int]cpuset.CPUSet, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to list items under %s: %v", cpuListPath, err)
 		}
-		fmt.Println(string(out[:]))
+		fmt.Println(string(out[:])) //TODO debug print
 		numaToCpu[idx], err = cpuset.Parse(strings.TrimSpace(string(out[:])))
 		if err != nil {
 			return nil, fmt.Errorf("could not parse numa cpuset: %v", err)
@@ -77,4 +79,40 @@ func GetNumaCpuMapping() (map[int]cpuset.CPUSet, error) {
 	}
 
 	return numaToCpu, nil
+}
+
+// GetNumaDeviceMapping return pci-device -> numa mapping, e.g node0: ["0000:00:00.0","0000:00:02.0","0000:00:04.0"]
+func GetNumaDeviceMapping() (map[int][]string, error) {
+	numaCount, err := GetNumaCount()
+	if err != nil {
+		return nil, err
+	}
+	numaToPci := make(map[int][]string, numaCount)
+
+	out, err := exec.Command("ls", sysBusPciDevicePath).Output()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list items under %s: %v", sysBusPciDevicePath, err)
+	}
+	devicesNames := strings.Fields(string(out[:]))
+	fmt.Printf("devices: \n %v \n ", devicesNames) //TODO debug print
+	for _, dName := range devicesNames {
+		dPath := filepath.Join(sysBusPciDevicePath, dName)
+		numaPath := filepath.Join(dPath, "numa_node")
+		out, err := exec.Command("cat", numaPath).Output()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get numa node of pci device %s: %v", dName, err)
+		}
+		nnode, err := strconv.Atoi(string(out[:]))
+		if err != nil {
+			return nil, fmt.Errorf("could not parse numa of pci device %s: %v", dName, err)
+		}
+
+		if nnode == -1 {
+			continue
+		}
+
+		numaToPci[nnode] = append(numaToPci[nnode], dName)
+	}
+
+	return numaToPci, nil
 }
