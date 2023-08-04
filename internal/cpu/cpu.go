@@ -26,19 +26,16 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
 
-const (
-	sysFsCgroupCpusetCpusPath = "/sys/fs/cgroup/cpuset/cpuset.cpus"
-)
-
 // GetConsumedCpusBy returns the consumed cpuset by a proccess
-func GetConsumedCpusBy() (cpuset.CPUSet, error) {
+func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 	var consumedCpuset cpuset.CPUSet
-	out, err := exec.Command("cat", sysFsCgroupCpusetCpusPath).Output()
+	out, err := exec.Command("grep", "Cpus_allowed_list", fmt.Sprintf("/proc/%s/status", pid)).Output()
 	if err != nil {
-		return consumedCpuset, fmt.Errorf("could not list cpuset from %s: %v", sysFsCgroupCpusetCpusPath, err)
+		return consumedCpuset, fmt.Errorf("could not get the status of process %s: %v", pid, err)
 	}
 
-	consumedCpuset, err = cpuset.Parse(strings.TrimSpace(string(out[:])))
+	val := strings.Split(string(out[:]), ":")[1]
+	consumedCpuset, err = cpuset.Parse(strings.TrimSpace(val))
 	if err != nil {
 		return consumedCpuset, fmt.Errorf("could not parse cpuset: %v", err)
 	}
@@ -47,14 +44,14 @@ func GetConsumedCpusBy() (cpuset.CPUSet, error) {
 }
 
 // CheckCpuAlignment checks if cpus consumed by a process are aligned to a single numa node
-func CheckCpuAlignment(output *NumaAlignmentOutput) {
+func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
 	numaToCpuset, err := GetNumaCpuMapping()
 	if err != nil {
 		output.Err = err
 		return
 	}
 
-	consumedCpuset, err := GetConsumedCpusBy() //TODO send pid
+	consumedCpuset, err := GetConsumedCpusBy(pid)
 	if err != nil {
 		output.Err = err
 		return
