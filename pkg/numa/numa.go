@@ -34,7 +34,6 @@ const (
 
 // GetNumaCount returns the numa node's count on the system
 func GetNumaCount() (int, error) {
-	//out, err := exec.Command("lscpu", "--json  |jq '.[] '").Output() //| .[] | select(.field==\"NUMA node(s):\")| .data'").Output()
 	nnodes, err := GetNumasList()
 	if err != nil {
 		return 0, err
@@ -71,7 +70,7 @@ func GetNumaCpuMapping() (map[int]cpuset.CPUSet, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to list items under %s: %v", cpuListPath, err)
 		}
-		fmt.Println(string(out[:])) //TODO debug print
+
 		numaToCpu[idx], err = cpuset.Parse(strings.TrimSpace(string(out[:])))
 		if err != nil {
 			return nil, fmt.Errorf("could not parse numa cpuset: %v", err)
@@ -94,7 +93,6 @@ func GetNumaDeviceMapping() (map[int][]string, error) {
 		return nil, fmt.Errorf("failed to list items under %s: %v", sysBusPciDevicePath, err)
 	}
 	devicesNames := strings.Fields(string(out[:]))
-	fmt.Printf("devices: \n %v \n ", devicesNames) //TODO debug print
 	for _, dName := range devicesNames {
 		dPath := filepath.Join(sysBusPciDevicePath, dName)
 		numaPath := filepath.Join(dPath, "numa_node")
