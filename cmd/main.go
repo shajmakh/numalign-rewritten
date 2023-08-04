@@ -17,8 +17,11 @@
 package main
 
 import (
+	"flag"
+	"io"
 	"log"
 	"os"
+	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
 	. "github.com/shajmakh/numaalign-rewritten/internal/cpu"
@@ -26,8 +29,31 @@ import (
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
 
+var (
+	pid            = flag.String("p", "", "pid of the process for which to check the numa alignment of its resources")
+	verbose        = flag.Bool("v", false, "display app output with debug level")
+	outputFilePath = flag.String("o", "", "path of output file; leave empty to display on standart output")
+)
+
 func main() {
-	//TODO allow optional flags like pid, output file,debug level
+	flag.Parse()
+
+	var outputDest io.Writer = os.Stdout
+	if outputFilePath != nil && *outputFilePath != "" {
+		f, err := os.Create(*outputFilePath)
+		if err != nil {
+			log.Fatalf("error opening %s: %v\n", *outputFilePath, err)
+		}
+		defer f.Close()
+		outputDest = f
+	}
+
+	Verbose = *verbose
+
+	processId := "self"
+	if strings.TrimSpace(*pid) != "" {
+		processId = strings.Fields(*pid)[0]
+	}
 
 	output := new(NumaAlignmentOutput)
 
@@ -35,18 +61,22 @@ func main() {
 	if err != nil {
 		log.Fatal(err) //TODO vs .Fatalf("%v",err)
 	}
-	log.Printf("Numa count on system is: %d", nNodeCount) //TODO make it a debug level output
+
+	if Verbose {
+		log.Printf("Numa count on system is: %d", nNodeCount)
+	}
+
 	if nNodeCount == 1 {
 		LogNumaAlignment(NumaAlignmentOutput{
 			NNode: 0,
 			Err:   nil,
-		})
+		}, outputDest)
 		os.Exit(0)
 	}
 
-	CheckCpuAlignment(output)
+	CheckCpuAlignment(processId, output)
 
-	LogNumaAlignment(*output)
+	LogNumaAlignment(*output, outputDest)
 
 	if false {
 		os.Exit(-1)
