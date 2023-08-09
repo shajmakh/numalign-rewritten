@@ -18,14 +18,12 @@ package main
 
 import (
 	"flag"
-	"io"
 	"log"
 	"os"
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
 	. "github.com/shajmakh/numaalign-rewritten/internal/cpu"
-
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
 
@@ -38,14 +36,13 @@ var (
 func main() {
 	flag.Parse()
 
-	var outputDest io.Writer = os.Stdout
 	if outputFilePath != nil && *outputFilePath != "" {
 		f, err := os.Create(*outputFilePath)
 		if err != nil {
 			log.Fatalf("error opening %s: %v\n", *outputFilePath, err)
 		}
 		defer f.Close()
-		outputDest = f
+		OutputDest = f
 	}
 
 	Verbose = *verbose
@@ -70,13 +67,13 @@ func main() {
 		LogNumaAlignment(NumaAlignmentOutput{
 			NNode: 0,
 			Err:   nil,
-		}, outputDest)
+		})
 		os.Exit(0)
 	}
 
 	CheckCpuAlignment(processId, output)
 
-	LogNumaAlignment(*output, outputDest)
+	LogNumaAlignment(*output)
 
 	if false {
 		os.Exit(-1)
