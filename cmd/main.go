@@ -18,13 +18,14 @@ package main
 
 import (
 	"flag"
-	"io"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
 	. "github.com/shajmakh/numaalign-rewritten/internal/cpu"
+	. "github.com/shajmakh/numaalign-rewritten/internal/device"
 
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
@@ -38,14 +39,13 @@ var (
 func main() {
 	flag.Parse()
 
-	var outputDest io.Writer = os.Stdout
 	if outputFilePath != nil && *outputFilePath != "" {
 		f, err := os.Create(*outputFilePath)
 		if err != nil {
 			log.Fatalf("error opening %s: %v\n", *outputFilePath, err)
 		}
 		defer f.Close()
-		outputDest = f
+		OutputDest = f
 	}
 
 	Verbose = *verbose
@@ -63,20 +63,22 @@ func main() {
 	}
 
 	if Verbose {
-		log.Printf("Numa count on system is: %d", nNodeCount)
+		WriteToDest(fmt.Sprintf("Numa count on system is: %d", nNodeCount))
 	}
 
 	if nNodeCount == 1 {
 		LogNumaAlignment(NumaAlignmentOutput{
 			NNode: 0,
 			Err:   nil,
-		}, outputDest)
+		})
 		os.Exit(0)
 	}
 
 	CheckCpuAlignment(processId, output)
 
-	LogNumaAlignment(*output, outputDest)
+	CheckPciDevicesAlignment(output)
+
+	LogNumaAlignment(*output)
 
 	if false {
 		os.Exit(-1)

@@ -20,28 +20,32 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os"
 )
 
-var Verbose bool
+var (
+	Verbose    bool
+	OutputDest io.Writer = os.Stdout
+)
 
 // LogNumaAlignment prints the final result of the program, -1 if resources are not aligned,otherwise the numa on which all the resources are aligned
-func LogNumaAlignment(res NumaAlignmentOutput, dest io.Writer) {
-	WriteToDest(fmt.Sprintf("NUMA %d\n", res.NNode), dest)
+func LogNumaAlignment(res NumaAlignmentOutput) {
+	WriteToDest(fmt.Sprintf("NUMA %d\n", res.NNode))
 
 	if Verbose {
 		printResources(res.ProccessResources)
 		if res.Err != nil {
-			fmt.Printf("Error: %v\n", res.Err)
+			WriteToDest(fmt.Sprintf("Error: %v\n", res.Err))
 		}
 	}
 }
 
 func printResources(rsrc ProccessResources) { //could be done a ToString() instead but would it be worth it to have another file for the process details (=app output)?
-	log.Printf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%v\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory)
+	WriteToDest(fmt.Sprintf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%v\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory))
 }
 
-func WriteToDest(str string, dest io.Writer) {
-	_, err := io.WriteString(dest, str)
+func WriteToDest(str string) {
+	_, err := io.WriteString(OutputDest, fmt.Sprintln(str))
 	if err != nil {
 		log.Fatal(err)
 	}
