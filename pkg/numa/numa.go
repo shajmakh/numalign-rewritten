@@ -80,13 +80,13 @@ func GetNumaCpuMapping() (map[int]cpuset.CPUSet, error) {
 	return numaToCpu, nil
 }
 
-// GetNumaDeviceMapping return pci-device -> numa mapping, e.g node0: ["0000:00:00.0","0000:00:02.0","0000:00:04.0"]
-func GetNumaDeviceMapping() (map[int][]string, error) {
+// GetNumaDeviceMapping return pci-device -> numa mapping, e.g ["0000:00:00.0":0, "0000:00:02.0":1,"0000:00:04.0":0]
+func GetNumaDeviceMapping() (map[string]int, error) {
 	numaCount, err := GetNumaCount()
 	if err != nil {
 		return nil, err
 	}
-	numaToPci := make(map[int][]string, numaCount)
+	numaToPci := make(map[string]int, numaCount)
 
 	out, err := exec.Command("ls", sysBusPciDevicePath).Output()
 	if err != nil {
@@ -109,7 +109,7 @@ func GetNumaDeviceMapping() (map[int][]string, error) {
 			continue
 		}
 
-		numaToPci[nnode] = append(numaToPci[nnode], dName)
+		numaToPci[dName] = nnode
 	}
 
 	return numaToPci, nil
