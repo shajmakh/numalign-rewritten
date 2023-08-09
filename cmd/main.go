@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -62,7 +63,7 @@ func main() {
 	}
 
 	if Verbose {
-		log.Printf("Numa count on system is: %d", nNodeCount)
+		WriteToDest(fmt.Sprintf("Numa count on system is: %d", nNodeCount))
 	}
 
 	if nNodeCount == 1 {

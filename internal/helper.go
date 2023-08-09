@@ -35,13 +35,13 @@ func LogNumaAlignment(res NumaAlignmentOutput) {
 	if Verbose {
 		printResources(res.ProccessResources)
 		if res.Err != nil {
-			fmt.Printf("Error: %v\n", res.Err)
+			WriteToDest(fmt.Sprintf("Error: %v\n", res.Err))
 		}
 	}
 }
 
 func printResources(rsrc ProccessResources) { //could be done a ToString() instead but would it be worth it to have another file for the process details (=app output)?
-	log.Printf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%v\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory)
+	WriteToDest(fmt.Sprintf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%v\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory))
 }
 
 func WriteToDest(str string) {
