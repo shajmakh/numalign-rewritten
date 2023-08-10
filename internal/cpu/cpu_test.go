@@ -42,9 +42,10 @@ func TestCheckNumaCpuMapping(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		actual := CheckNumaCpuMapping(c.testMap, c.cpuset, NumaAlignmentOutput{NNode: -1})
-		if actual != c.expectedNuma {
-			t.Fatalf("expected: %d, actual: %d, cpuset: [%v]", c.expectedNuma, actual, c.cpuset)
+		out := NumaAlignmentOutput{NNode: -1}
+		CheckNumaCpuMapping(c.testMap, c.cpuset, &out)
+		if out.NNode != c.expectedNuma {
+			t.Fatalf("expected: %d, actual: %d, cpuset: [%v]", c.expectedNuma, out.NNode, c.cpuset)
 		}
 	}
 }

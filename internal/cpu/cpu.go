@@ -58,11 +58,11 @@ func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
 	}
 	output.ProccessResources.CPUs = consumedCpuset
 
-	CheckNumaCpuMapping(numaToCpuset, consumedCpuset, *output)
+	CheckNumaCpuMapping(numaToCpuset, consumedCpuset, output)
 }
 
 // CheckNumaCpuMapping checks if a cpuset is mapped to a numa and returns that numa
-func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpuset.CPUSet, output NumaAlignmentOutput) int {
+func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpuset.CPUSet, output *NumaAlignmentOutput) {
 	for idx, allocatedCpuset := range numaToCpuset {
 		if consumedCpuset.IsSubsetOf(allocatedCpuset) {
 			if output.NNode != -1 && output.NNode != idx {
@@ -73,5 +73,4 @@ func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpus
 			break
 		}
 	}
-	return output.NNode
 }
