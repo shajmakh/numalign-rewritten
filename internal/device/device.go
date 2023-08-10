@@ -21,8 +21,17 @@ func CheckPciDevicesAlignment(out *NumaAlignmentOutput) {
 		out.Err = err
 		return
 	}
-	for _, devName := range requestedDevs {
+
+	CheckPciDeviceToNumaMapping(deviceNumaMap, requestedDevs, out)
+}
+
+func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string, out *NumaAlignmentOutput) {
+	for _, devName := range devList {
 		if nnode, found := deviceNumaMap[devName]; found {
+			if out.NNode == -1 {
+				out.NNode = nnode
+				continue
+			}
 			if nnode != out.NNode {
 				out.NNode = -1
 				if Verbose {
