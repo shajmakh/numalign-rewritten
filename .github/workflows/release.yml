@@ -35,4 +35,5 @@ jobs:
       - name: release the tool binary
         uses: ncipollo/release-action@v1
         with:
+          fetch-depth: 0
           artifacts: ../../build/numalign
