@@ -1,22 +1,37 @@
 name: release workflow
 on:
-  push:
-    branches:
-      - main
-  
-permissions:
-    contents: write
-    packages: write
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  release-linux-amd64:
-    name: release linux/amd64
+  setup:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: wangyoucao577/go-release-action@v1
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        goos: linux
-        goarch: amd64
-        
+      - name: checkout sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup golang
+        uses: actions/setup-go@v2
+        id: go
+        with:
+          go-version: 1.20
+  build:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout sources
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: build numalign
+        run: make
+
+      - name: release the tool binary
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ../build/numalign
