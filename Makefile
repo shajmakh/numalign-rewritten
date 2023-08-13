@@ -1,6 +1,6 @@
 
 .PHONY: all
-all: run
+all: build
 
 .PHONY: gofmt
 gofmt:
@@ -9,11 +9,7 @@ gofmt:
 
 .PHONY: build
 build: 
-	go build -o ./build/bin/numalign ./cmd/main.go
-
-.PHONY: run
-run: build
-	./build/bin/numalign 
+	go build -o ./build/numalign ./cmd/main.go
 
 .PHONY: deps-update
 deps-update:
