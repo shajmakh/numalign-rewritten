@@ -29,9 +29,10 @@ jobs:
           fetch-depth: 0
 
       - name: build numalign
+        # The binary will be saved under ../../build as numalign
         run: make
 
       - name: release the tool binary
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ../build/numalign
+          artifacts: ../../build/numalign
