@@ -15,32 +15,36 @@ func TestCheckPciDevicesAlignment(t *testing.T) {
 	}
 
 	testCases := []struct {
-		testMap      map[string]int
-		devList      []string
-		expectedNuma int
+		testMap           map[string]int
+		devList           []string
+		expectedNuma      int
+		expectedIsAligned bool
 	}{
 		{
 			devNumaMap,
 			[]string{"example.com/deviceA"},
 			0,
+			true,
 		},
 		{
 			devNumaMap,
 			[]string{"example.com/deviceA", "example.com/deviceB"},
 			-1,
+			false,
 		},
 		{
 			devNumaMap,
 			[]string{"example.com/deviceC", "example.com/deviceB"},
 			1,
+			true,
 		},
 	}
 
 	for _, c := range testCases {
-		out := NumaAlignmentOutput{NNode: -1}
+		out := NewOutput()
 		CheckPciDeviceToNumaMapping(c.testMap, c.devList, &out)
-		if out.NNode != c.expectedNuma {
-			t.Fatalf("expected: %d, actual: %d, devices list: [%v]", c.expectedNuma, out.NNode, c.devList)
+		if out.NNode != c.expectedNuma || out.IsAligned != c.expectedIsAligned {
+			t.Fatalf("expected alignment: %t:%d ; actual: %t/%d ; devices list: [%v]", c.expectedIsAligned, c.expectedNuma, out.IsAligned, out.NNode, c.devList)
 		}
 	}
 
