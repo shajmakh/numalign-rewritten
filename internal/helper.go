@@ -50,3 +50,10 @@ func WriteToDest(str string) {
 		log.Fatal(err)
 	}
 }
+
+func NewOutput() NumaAlignmentOutput {
+	o := new(NumaAlignmentOutput)
+	o.NNode = -1
+	o.IsAligned = true
+	return *o
+}

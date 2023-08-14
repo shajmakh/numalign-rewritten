@@ -55,7 +55,7 @@ func main() {
 		processId = strings.Fields(*pid)[0]
 	}
 
-	output := new(NumaAlignmentOutput)
+	output := NewOutput()
 
 	nNodeCount, err := numa.GetNumaCount()
 	if err != nil {
@@ -67,20 +67,18 @@ func main() {
 	}
 
 	if nNodeCount == 1 {
-		LogNumaAlignment(NumaAlignmentOutput{
-			NNode: 0,
-			Err:   nil,
-		})
+		output.NNode = 0
+		LogNumaAlignment(output)
 		os.Exit(0)
 	}
 
-	CheckCpuAlignment(processId, output)
+	CheckCpuAlignment(processId, &output)
 
-	CheckPciDevicesAlignment(output)
+	CheckPciDevicesAlignment(&output)
 
-	LogNumaAlignment(*output)
+	LogNumaAlignment(output)
 
-	if false {
+	if !output.IsAligned {
 		os.Exit(-1)
 	}
 
