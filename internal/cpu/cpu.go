@@ -47,12 +47,14 @@ func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
 	numaToCpuset, err := GetNumaCpuMapping()
 	if err != nil {
+		output.IsAligned = false
 		output.Err = err
 		return
 	}
 
 	consumedCpuset, err := GetConsumedCpusBy(pid)
 	if err != nil {
+		output.IsAligned = false
 		output.Err = err
 		return
 	}
@@ -63,14 +65,25 @@ func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
 
 // CheckNumaCpuMapping checks if a cpuset is mapped to a numa and returns that numa
 func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpuset.CPUSet, output *NumaAlignmentOutput) {
+	if !output.IsAligned {
+		return
+	}
+	//there is no way that the consumed cpus are empty, but let's cover that case for the sake of completness
+	if consumedCpuset.IsEmpty() {
+		return
+	}
 	for idx, allocatedCpuset := range numaToCpuset {
 		if consumedCpuset.IsSubsetOf(allocatedCpuset) {
 			if output.NNode != -1 && output.NNode != idx {
 				output.NNode = -1
-				break
+				output.IsAligned = false
+				return
 			}
 			output.NNode = idx
-			break
+			return
 		}
 	}
+	// this is a case where the consumed subset is part of more than one numa, we know it's not empty
+	// so it definitely indicates more than 1 numa
+	output.IsAligned = false
 }
