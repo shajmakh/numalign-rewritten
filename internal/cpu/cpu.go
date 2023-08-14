@@ -87,3 +87,8 @@ func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpus
 	// so it definitely indicates more than 1 numa
 	output.IsAligned = false
 }
+
+func GetCpuset(set string) cpuset.CPUSet {
+	cpuset, _ := cpuset.Parse(set)
+	return cpuset
+}

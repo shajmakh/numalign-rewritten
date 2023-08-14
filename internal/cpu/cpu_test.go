@@ -26,8 +26,8 @@ import (
 func TestCheckNumaCpuMapping(t *testing.T) {
 
 	numaCpuMap := map[int]cpuset.CPUSet{
-		0: getCpuset("3-5,8-15"),
-		1: getCpuset("0-2,6-7"),
+		0: GetCpuset("3-5,8-15"),
+		1: GetCpuset("0-2,6-7"),
 	}
 
 	testCases := []struct {
@@ -36,11 +36,11 @@ func TestCheckNumaCpuMapping(t *testing.T) {
 		expectedNuma      int
 		expectedIsAligned bool
 	}{
-		{numaCpuMap, getCpuset("0-2"), 1, true},
-		{numaCpuMap, getCpuset("5"), 0, true},
-		{numaCpuMap, getCpuset("3-5,11,13"), 0, true},  //negative
-		{numaCpuMap, getCpuset("1,5,9,12"), -1, false}, //negative
-		{numaCpuMap, getCpuset("0-2,1,5"), -1, false},  //negative
+		{numaCpuMap, GetCpuset("0-2"), 1, true},
+		{numaCpuMap, GetCpuset("5"), 0, true},
+		{numaCpuMap, GetCpuset("3-5,11,13"), 0, true},  //negative
+		{numaCpuMap, GetCpuset("1,5,9,12"), -1, false}, //negative
+		{numaCpuMap, GetCpuset("0-2,1,5"), -1, false},  //negative
 	}
 
 	for _, c := range testCases {
@@ -50,9 +50,4 @@ func TestCheckNumaCpuMapping(t *testing.T) {
 			t.Fatalf("expected alignment: %t:%d ; actual: %t/%d ; CPU set: [%v]", c.expectedIsAligned, c.expectedNuma, out.IsAligned, out.NNode, c.cpuset)
 		}
 	}
-}
-
-func getCpuset(set string) cpuset.CPUSet {
-	cpuset, _ := cpuset.Parse(set)
-	return cpuset
 }
