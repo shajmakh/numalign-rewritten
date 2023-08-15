@@ -15,3 +15,7 @@ build:
 deps-update:
 	go mod tidy && \
 	go mod vendor
+
+.PHONY: tests
+tests: 
+	go test ./...
