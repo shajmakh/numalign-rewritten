@@ -30,7 +30,7 @@ var (
 
 // LogNumaAlignment prints the final result of the program, -1 if resources are not aligned,otherwise the numa on which all the resources are aligned
 func LogNumaAlignment(res NumaAlignmentOutput) {
-	WriteToDest(fmt.Sprintf("NUMA %d\n", res.NNode))
+	WriteToDest(fmt.Sprintf("NUMA: %d\n", res.NNode))
 
 	if Verbose {
 		printResources(res.ProccessResources)
@@ -49,4 +49,11 @@ func WriteToDest(str string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func NewOutput() NumaAlignmentOutput {
+	o := new(NumaAlignmentOutput)
+	o.NNode = -1
+	o.IsAligned = true
+	return *o
 }

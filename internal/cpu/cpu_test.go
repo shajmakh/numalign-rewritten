@@ -26,31 +26,28 @@ import (
 func TestCheckNumaCpuMapping(t *testing.T) {
 
 	numaCpuMap := map[int]cpuset.CPUSet{
-		0: getCpuset("3-5,8-15"),
-		1: getCpuset("0-2,6-7"),
+		0: GetCpuset("3-5,8-15"),
+		1: GetCpuset("0-2,6-7"),
 	}
 
 	testCases := []struct {
-		testMap      map[int]cpuset.CPUSet
-		cpuset       cpuset.CPUSet
-		expectedNuma int
+		testMap           map[int]cpuset.CPUSet
+		cpuset            cpuset.CPUSet
+		expectedNuma      int
+		expectedIsAligned bool
 	}{
-		{numaCpuMap, getCpuset("0-2"), 1},
-		{numaCpuMap, getCpuset("5"), 0},
-		{numaCpuMap, getCpuset("1,5,9,12"), -1}, //negative
-		{numaCpuMap, getCpuset("0-2,1,5"), -1},  //negative
+		{numaCpuMap, GetCpuset("0-2"), 1, true},
+		{numaCpuMap, GetCpuset("5"), 0, true},
+		{numaCpuMap, GetCpuset("3-5,11,13"), 0, true},  //negative
+		{numaCpuMap, GetCpuset("1,5,9,12"), -1, false}, //negative
+		{numaCpuMap, GetCpuset("0-2,1,5"), -1, false},  //negative
 	}
 
 	for _, c := range testCases {
-		out := NumaAlignmentOutput{NNode: -1}
+		out := NewOutput()
 		CheckNumaCpuMapping(c.testMap, c.cpuset, &out)
-		if out.NNode != c.expectedNuma {
-			t.Fatalf("expected: %d, actual: %d, cpuset: [%v]", c.expectedNuma, out.NNode, c.cpuset)
+		if out.NNode != c.expectedNuma || out.IsAligned != c.expectedIsAligned {
+			t.Fatalf("expected alignment: %t:%d ; actual: %t/%d ; CPU set: [%v]", c.expectedIsAligned, c.expectedNuma, out.IsAligned, out.NNode, c.cpuset)
 		}
 	}
-}
-
-func getCpuset(set string) cpuset.CPUSet {
-	cpuset, _ := cpuset.Parse(set)
-	return cpuset
 }

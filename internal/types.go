@@ -20,6 +20,7 @@ import "k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 
 type NumaAlignmentOutput struct {
 	NNode             int
+	IsAligned         bool
 	Err               error
 	ProccessResources ProccessResources
 }

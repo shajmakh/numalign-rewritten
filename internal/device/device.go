@@ -26,14 +26,22 @@ func CheckPciDevicesAlignment(out *NumaAlignmentOutput) {
 }
 
 func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string, out *NumaAlignmentOutput) {
+	if !out.IsAligned {
+		return
+	}
+	if len(devList) == 0 {
+		return
+	}
 	for _, devName := range devList {
 		if nnode, found := deviceNumaMap[devName]; found {
 			if out.NNode == -1 {
 				out.NNode = nnode
 				continue
 			}
+
 			if nnode != out.NNode {
 				out.NNode = -1
+				out.IsAligned = false
 				if Verbose {
 					WriteToDest(fmt.Sprintf("resources used by the process are not aligned to a single numa: PCI device %q\n", devName))
 				}
