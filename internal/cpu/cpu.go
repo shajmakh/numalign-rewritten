@@ -19,6 +19,7 @@ package cpu
 import (
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
@@ -29,17 +30,21 @@ import (
 // GetConsumedCpusBy returns the consumed cpuset by a proccess
 func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 	var consumedCpuset cpuset.CPUSet
-	out, err := exec.Command("grep", "Cpus_allowed_list", fmt.Sprintf("/proc/%s/status", pid)).Output()
+	out, err := exec.Command("cat", fmt.Sprintf("/proc/%s/status", pid)).Output()
+
 	if err != nil {
 		return consumedCpuset, fmt.Errorf("could not get the status of process %s: %v", pid, err)
 	}
+	outStr := string(out[:])
 
-	val := strings.Split(string(out[:]), ":")[1]
-	consumedCpuset, err = cpuset.Parse(strings.TrimSpace(val))
+	//compile regex and get the matching output
+	re := regexp.MustCompile(`Cpus_allowed_list:(.*)`)
+	match := re.FindStringSubmatch(outStr)
+
+	consumedCpuset, err = cpuset.Parse(strings.TrimSpace(match[1]))
 	if err != nil {
 		return consumedCpuset, fmt.Errorf("could not parse cpuset: %v", err)
 	}
-
 	return consumedCpuset, nil
 }
 
