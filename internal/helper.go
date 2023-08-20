@@ -21,6 +21,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 )
 
 var (
@@ -30,7 +31,7 @@ var (
 
 // LogNumaAlignment prints the final result of the program, -1 if resources are not aligned,otherwise the numa on which all the resources are aligned
 func LogNumaAlignment(res NumaAlignmentOutput) {
-	WriteToDest(fmt.Sprintf("NUMA: %d\n", res.NNode))
+	WriteToDest(fmt.Sprintf("Is Aligned: %t\nNUMA: %d\n", res.IsAligned, res.NNode))
 
 	if Verbose {
 		printResources(res.ProccessResources)
@@ -41,7 +42,7 @@ func LogNumaAlignment(res NumaAlignmentOutput) {
 }
 
 func printResources(rsrc ProccessResources) { //could be done a ToString() instead but would it be worth it to have another file for the process details (=app output)?
-	WriteToDest(fmt.Sprintf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%v\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory))
+	WriteToDest(fmt.Sprintf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%s\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory))
 }
 
 func WriteToDest(str string) {
@@ -56,4 +57,16 @@ func NewOutput() NumaAlignmentOutput {
 	o.NNode = -1
 	o.IsAligned = true
 	return *o
+}
+
+/*
+GetValue returns slice of strings that matches the value after the passed key.
+The expected syntax should be "key:value", otherwise it'll return nil slice.
+In a successful matching case, the strings slice contains the first elemant as "from"
+and subsequent elements are the matching strings to the compiled pattern
+*/
+func GetValue(key string, from string) []string {
+	re := regexp.MustCompile(fmt.Sprintf(`%s:(.*)`, key))
+	match := re.FindStringSubmatch(from)
+	return match
 }

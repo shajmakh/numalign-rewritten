@@ -19,13 +19,14 @@ package cpu
 import (
 	"fmt"
 	"os/exec"
-	"regexp"
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
 	. "github.com/shajmakh/numaalign-rewritten/pkg/numa"
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
+
+const CPUS_ALLOWED_LIST = "Cpus_allowed_list"
 
 // GetConsumedCpusBy returns the consumed cpuset by a proccess
 func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
@@ -38,9 +39,10 @@ func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 	outStr := string(out[:])
 
 	//compile regex and get the matching output
-	re := regexp.MustCompile(`Cpus_allowed_list:(.*)`)
-	match := re.FindStringSubmatch(outStr)
-
+	match := GetValue(CPUS_ALLOWED_LIST, outStr)
+	if len(match) == 0 {
+		return consumedCpuset, fmt.Errorf("value %s not found in %s", CPUS_ALLOWED_LIST, outStr)
+	}
 	consumedCpuset, err = cpuset.Parse(strings.TrimSpace(match[1]))
 	if err != nil {
 		return consumedCpuset, fmt.Errorf("could not parse cpuset: %v", err)
