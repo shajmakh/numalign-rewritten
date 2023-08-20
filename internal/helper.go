@@ -21,6 +21,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 )
 
 var (
@@ -56,4 +57,16 @@ func NewOutput() NumaAlignmentOutput {
 	o.NNode = -1
 	o.IsAligned = true
 	return *o
+}
+
+/*
+GetValue returns slice of strings that matches the value after the passed key.
+The expected syntax should be "key:value", otherwise it'll return nil slice.
+In a successful matching case, the strings slice contains the first elemant as "from"
+and subsequent elements are the matching strings to the compiled pattern
+*/
+func GetValue(key string, from string) []string {
+	re := regexp.MustCompile(fmt.Sprintf(`%s:(.*)`, key))
+	match := re.FindStringSubmatch(from)
+	return match
 }
