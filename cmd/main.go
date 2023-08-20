@@ -26,6 +26,7 @@ import (
 	. "github.com/shajmakh/numaalign-rewritten/internal"
 	. "github.com/shajmakh/numaalign-rewritten/internal/cpu"
 	. "github.com/shajmakh/numaalign-rewritten/internal/device"
+	. "github.com/shajmakh/numaalign-rewritten/internal/memory"
 
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
@@ -75,6 +76,8 @@ func main() {
 	CheckCpuAlignment(processId, &output)
 
 	CheckPciDevicesAlignment(&output)
+
+	CheckMemoryResourcesAlignment(processId, &output)
 
 	LogNumaAlignment(output)
 

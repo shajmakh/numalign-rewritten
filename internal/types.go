@@ -28,5 +28,5 @@ type NumaAlignmentOutput struct {
 type ProccessResources struct {
 	CPUs   cpuset.CPUSet
 	PCI    []string
-	Memory []string
+	Memory string
 }
