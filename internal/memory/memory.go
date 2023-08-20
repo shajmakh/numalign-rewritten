@@ -48,15 +48,19 @@ func CheckMemoryResourcesAlignment(pid string, output *NumaAlignmentOutput) {
 		output.Err = fmt.Errorf("value %s not found in %s", MEMS_ALLOWED_LIST, outStr)
 		return
 	}
-	checkAlignmentWith(match[1], output)
+	CheckAlignmentWith(match[1], output)
 }
 
-func checkAlignmentWith(memStr string, output *NumaAlignmentOutput) {
+func CheckAlignmentWith(memStr string, output *NumaAlignmentOutput) {
+	if !output.IsAligned {
+		return
+	}
 	//the memory nodes value is similarly presented as CPUset so it can be parsed as cpuset
 	val := strings.TrimSpace(memStr)
 	nodeList, err := cpuset.Parse(val)
 	if err != nil {
 		output.IsAligned = false
+		output.NNode = -1
 		output.Err = fmt.Errorf("could not parse memory nodes' list: %v", err)
 		return
 	}
@@ -64,6 +68,7 @@ func checkAlignmentWith(memStr string, output *NumaAlignmentOutput) {
 	output.ProccessResources.Memory = val
 	if nodeList.Size() > 1 {
 		output.IsAligned = false
+		output.NNode = -1
 		return
 	}
 

@@ -6,6 +6,7 @@ import (
 	. "github.com/shajmakh/numaalign-rewritten/internal"
 	"github.com/shajmakh/numaalign-rewritten/internal/cpu"
 	"github.com/shajmakh/numaalign-rewritten/internal/device"
+	"github.com/shajmakh/numaalign-rewritten/internal/memory"
 
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
@@ -33,8 +34,9 @@ func TestResourcesNumaAlign(t *testing.T) {
 		{
 			description: "aligned",
 			consumedResources: ProccessResources{
-				CPUs: cpu.GetCpuset("3-5,11,13"),
-				PCI:  []string{"devA", "devB"},
+				CPUs:   cpu.GetCpuset("3-5,11,13"),
+				PCI:    []string{"devA", "devB"},
+				Memory: "1",
 			},
 			numaToCpuMap:      cpuMap,
 			pciToNumaMap:      pciMap,
@@ -44,8 +46,9 @@ func TestResourcesNumaAlign(t *testing.T) {
 		{
 			description: "aligned",
 			consumedResources: ProccessResources{
-				CPUs: cpu.GetCpuset("0,2"),
-				PCI:  []string{},
+				CPUs:   cpu.GetCpuset("0,2"),
+				PCI:    []string{},
+				Memory: "0",
 			},
 			numaToCpuMap:      cpuMap,
 			pciToNumaMap:      pciMap,
@@ -53,10 +56,11 @@ func TestResourcesNumaAlign(t *testing.T) {
 			expectedIsAligned: true,
 		},
 		{
-			description: "not aligned",
+			description: "not aligned (memory)",
 			consumedResources: ProccessResources{
-				CPUs: cpu.GetCpuset("3-5"),
-				PCI:  []string{"devA", "devC"},
+				CPUs:   cpu.GetCpuset("0,2"),
+				PCI:    []string{},
+				Memory: "0-1",
 			},
 			numaToCpuMap:      cpuMap,
 			pciToNumaMap:      pciMap,
@@ -64,10 +68,47 @@ func TestResourcesNumaAlign(t *testing.T) {
 			expectedIsAligned: false,
 		},
 		{
-			description: "not aligned",
+			description: "not aligned (devices)",
 			consumedResources: ProccessResources{
-				CPUs: cpu.GetCpuset("1-6"),
-				PCI:  []string{"devC"},
+				CPUs:   cpu.GetCpuset("3-5"),
+				PCI:    []string{"devA", "devC"},
+				Memory: "1",
+			},
+			numaToCpuMap:      cpuMap,
+			pciToNumaMap:      pciMap,
+			expectedNuma:      -1,
+			expectedIsAligned: false,
+		},
+		{
+			description: "not aligned (cpus)",
+			consumedResources: ProccessResources{
+				CPUs:   cpu.GetCpuset("1-6"),
+				PCI:    []string{"devC"},
+				Memory: "0",
+			},
+			numaToCpuMap:      cpuMap,
+			pciToNumaMap:      pciMap,
+			expectedNuma:      -1,
+			expectedIsAligned: false,
+		},
+		{
+			description: "not aligned (memory)",
+			consumedResources: ProccessResources{
+				CPUs:   cpu.GetCpuset("1"),
+				PCI:    []string{"devC"},
+				Memory: "1",
+			},
+			numaToCpuMap:      cpuMap,
+			pciToNumaMap:      pciMap,
+			expectedNuma:      -1,
+			expectedIsAligned: false,
+		},
+		{
+			description: "not aligned (memory)",
+			consumedResources: ProccessResources{
+				CPUs:   cpu.GetCpuset("1"),
+				PCI:    []string{"devA", "devB"},
+				Memory: "0-1",
 			},
 			numaToCpuMap:      cpuMap,
 			pciToNumaMap:      pciMap,
@@ -79,7 +120,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 	for _, tc := range testCases {
 		numa, isAligned := CpuPciIntegrationAlignment(tc.consumedResources, tc.numaToCpuMap, tc.pciToNumaMap)
 		if isAligned != tc.expectedIsAligned || numa != tc.expectedNuma {
-			t.Fatalf("expected alignment: %t:%d ; actual: %t:%d ; cpuset: [%s], devices list: [%v]", tc.expectedIsAligned, tc.expectedNuma, isAligned, numa, tc.consumedResources.CPUs, tc.consumedResources.PCI)
+			t.Fatalf("expected alignment: %t:%d ; actual: %t:%d ; cpuset: [%s], devices list: [%v], memory nodes: [%s]", tc.expectedIsAligned, tc.expectedNuma, isAligned, numa, tc.consumedResources.CPUs, tc.consumedResources.PCI, tc.consumedResources.Memory)
 		}
 	}
 }
@@ -91,5 +132,6 @@ func CpuPciIntegrationAlignment(res ProccessResources, cpuMap map[int]cpuset.CPU
 	// Hence, these tests does not provide full tests coverage.
 	cpu.CheckNumaCpuMapping(cpuMap, res.CPUs, &out)
 	device.CheckPciDeviceToNumaMapping(pciMap, res.PCI, &out)
+	memory.CheckAlignmentWith(res.Memory, &out)
 	return out.NNode, out.IsAligned
 }
