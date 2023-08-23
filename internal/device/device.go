@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
-	. "github.com/shajmakh/numaalign-rewritten/pkg/numa"
+	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
 
 // CheckPciDevicesAlignment checks alignment to numa node of the PCI devices used by the process. The expected used devices are fetched from environment variable DEV_RESOURCES
@@ -16,7 +16,7 @@ func CheckPciDevicesAlignment(out *NumaAlignmentOutput) {
 		return
 	}
 
-	deviceNumaMap, err := GetNumaDeviceMapping()
+	deviceNumaMap, err := numa.GetNumaDeviceMapping()
 	if err != nil {
 		out.Err = err
 		return

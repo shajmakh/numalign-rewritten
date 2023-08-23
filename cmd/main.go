@@ -24,9 +24,9 @@ import (
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
-	. "github.com/shajmakh/numaalign-rewritten/internal/cpu"
-	. "github.com/shajmakh/numaalign-rewritten/internal/device"
-	. "github.com/shajmakh/numaalign-rewritten/internal/memory"
+	"github.com/shajmakh/numaalign-rewritten/internal/cpu"
+	"github.com/shajmakh/numaalign-rewritten/internal/device"
+	"github.com/shajmakh/numaalign-rewritten/internal/memory"
 
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
@@ -73,11 +73,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	CheckCpuAlignment(processId, &output)
+	cpu.CheckCpuAlignment(processId, &output)
 
-	CheckPciDevicesAlignment(&output)
+	device.CheckPciDevicesAlignment(&output)
 
-	CheckMemoryResourcesAlignment(processId, &output)
+	memory.CheckMemoryResourcesAlignment(processId, &output)
 
 	LogNumaAlignment(output)
 
