@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	. "github.com/shajmakh/numaalign-rewritten/internal"
-	. "github.com/shajmakh/numaalign-rewritten/pkg/numa"
+	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
 
@@ -52,7 +52,7 @@ func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 
 // CheckCpuAlignment checks if cpus consumed by a process are aligned to a single numa node
 func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
-	numaToCpuset, err := GetNumaCpuMapping()
+	numaToCpuset, err := numa.GetNumaCpuMapping()
 	if err != nil {
 		output.IsAligned = false
 		output.Err = err
@@ -95,6 +95,7 @@ func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpus
 	output.IsAligned = false
 }
 
+// GetCpuset converts the string "set" to CPUSet and returns it
 func GetCpuset(set string) cpuset.CPUSet {
 	cpuset, _ := cpuset.Parse(set)
 	return cpuset

@@ -118,14 +118,14 @@ func TestResourcesNumaAlign(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		numa, isAligned := CpuPciIntegrationAlignment(tc.consumedResources, tc.numaToCpuMap, tc.pciToNumaMap)
+		numa, isAligned := cpuPciIntegrationAlignment(tc.consumedResources, tc.numaToCpuMap, tc.pciToNumaMap)
 		if isAligned != tc.expectedIsAligned || numa != tc.expectedNuma {
 			t.Fatalf("expected alignment: %t:%d ; actual: %t:%d ; cpuset: [%s], devices list: [%v], memory nodes: [%s]", tc.expectedIsAligned, tc.expectedNuma, isAligned, numa, tc.consumedResources.CPUs, tc.consumedResources.PCI, tc.consumedResources.Memory)
 		}
 	}
 }
 
-func CpuPciIntegrationAlignment(res ProccessResources, cpuMap map[int]cpuset.CPUSet, pciMap map[string]int) (int, bool) {
+func cpuPciIntegrationAlignment(res ProccessResources, cpuMap map[int]cpuset.CPUSet, pciMap map[string]int) (int, bool) {
 	out := NewOutput()
 	// till now we do not have a cheap way to write e2e real test cases, thus we simulate the steps
 	// that main does to check the alignments, taking into account the order of the checks.
