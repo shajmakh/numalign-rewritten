@@ -28,6 +28,10 @@ import (
 
 const MEMS_ALLOWED_LIST = "Mems_allowed_list"
 
+/*
+CheckMemoryResourcesAlignment checks if memory obtained by the process of the passed pid is from a single
+numa and is matching output.NNode if previous resources are aligned.
+*/
 func CheckMemoryResourcesAlignment(pid string, output *NumaAlignmentOutput) {
 	if !output.IsAligned {
 		return
@@ -51,6 +55,10 @@ func CheckMemoryResourcesAlignment(pid string, output *NumaAlignmentOutput) {
 	CheckAlignmentWith(match[1], output)
 }
 
+/*
+CheckAlignmentWith Updates "output" with the alignment details after checking if the memSr points
+to a single numa and is aligned with output.NNode.
+*/
 func CheckAlignmentWith(memStr string, output *NumaAlignmentOutput) {
 	if !output.IsAligned {
 		return

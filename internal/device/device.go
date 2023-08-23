@@ -25,6 +25,11 @@ func CheckPciDevicesAlignment(out *NumaAlignmentOutput) {
 	CheckPciDeviceToNumaMapping(deviceNumaMap, requestedDevs, out)
 }
 
+/*
+CheckPciDeviceToNumaMapping updates "out" with the alignment result of device resources to a single numa.
+If out.NNode is not -1 it compares the numa of the devices with that numa and if numas are not the same it
+updates "out" with un-alignment info --> IsAligned: false; NNode:-1
+*/
 func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string, out *NumaAlignmentOutput) {
 	if !out.IsAligned {
 		return

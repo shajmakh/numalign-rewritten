@@ -95,6 +95,7 @@ func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpus
 	output.IsAligned = false
 }
 
+// GetCpuset converts the string "set" to CPUSet and returns it
 func GetCpuset(set string) cpuset.CPUSet {
 	cpuset, _ := cpuset.Parse(set)
 	return cpuset

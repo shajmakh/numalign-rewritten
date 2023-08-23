@@ -45,6 +45,7 @@ func printResources(rsrc ProccessResources) { //could be done a ToString() inste
 	WriteToDest(fmt.Sprintf("consumed resources:\n CPUs:\n%v\n PCI devices:\n%v\n Memory:\n%s\n", rsrc.CPUs.String(), rsrc.PCI, rsrc.Memory))
 }
 
+// WriteToDest writes the passed str string to OutputDest - by default is stdout
 func WriteToDest(str string) {
 	_, err := io.WriteString(OutputDest, fmt.Sprintln(str))
 	if err != nil {
@@ -52,6 +53,7 @@ func WriteToDest(str string) {
 	}
 }
 
+// NewOutput initialize and returns the program output object
 func NewOutput() NumaAlignmentOutput {
 	o := new(NumaAlignmentOutput)
 	o.NNode = -1
