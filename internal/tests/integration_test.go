@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 	"github.com/shajmakh/numaalign-rewritten/internal/cpu"
 	"github.com/shajmakh/numaalign-rewritten/internal/device"
 	"github.com/shajmakh/numaalign-rewritten/internal/memory"
@@ -25,7 +25,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 
 	testCases := []struct {
 		description       string
-		consumedResources ProccessResources
+		consumedResources internal.ProccessResources
 		numaToCpuMap      map[int]cpuset.CPUSet
 		pciToNumaMap      map[string]int
 		expectedNuma      int
@@ -33,7 +33,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 	}{
 		{
 			description: "aligned",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("3-5,11,13"),
 				PCI:    []string{"devA", "devB"},
 				Memory: "1",
@@ -45,7 +45,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 		},
 		{
 			description: "aligned",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("0,2"),
 				PCI:    []string{},
 				Memory: "0",
@@ -57,7 +57,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 		},
 		{
 			description: "not aligned (memory)",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("0,2"),
 				PCI:    []string{},
 				Memory: "0-1",
@@ -69,7 +69,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 		},
 		{
 			description: "not aligned (devices)",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("3-5"),
 				PCI:    []string{"devA", "devC"},
 				Memory: "1",
@@ -81,7 +81,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 		},
 		{
 			description: "not aligned (cpus)",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("1-6"),
 				PCI:    []string{"devC"},
 				Memory: "0",
@@ -93,7 +93,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 		},
 		{
 			description: "not aligned (memory)",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("1"),
 				PCI:    []string{"devC"},
 				Memory: "1",
@@ -105,7 +105,7 @@ func TestResourcesNumaAlign(t *testing.T) {
 		},
 		{
 			description: "not aligned (memory)",
-			consumedResources: ProccessResources{
+			consumedResources: internal.ProccessResources{
 				CPUs:   cpu.GetCpuset("1"),
 				PCI:    []string{"devA", "devB"},
 				Memory: "0-1",
@@ -125,8 +125,8 @@ func TestResourcesNumaAlign(t *testing.T) {
 	}
 }
 
-func cpuPciIntegrationAlignment(res ProccessResources, cpuMap map[int]cpuset.CPUSet, pciMap map[string]int) (int, bool) {
-	out := NewOutput()
+func cpuPciIntegrationAlignment(res internal.ProccessResources, cpuMap map[int]cpuset.CPUSet, pciMap map[string]int) (int, bool) {
+	out := internal.NewOutput()
 	// till now we do not have a cheap way to write e2e real test cases, thus we simulate the steps
 	// that main does to check the alignments, taking into account the order of the checks.
 	// Hence, these tests does not provide full tests coverage.

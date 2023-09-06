@@ -19,7 +19,7 @@ package cpu
 import (
 	"testing"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
 
@@ -44,7 +44,7 @@ func TestCheckNumaCpuMapping(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		out := NewOutput()
+		out := internal.NewOutput()
 		CheckNumaCpuMapping(c.testMap, c.cpuset, &out)
 		if out.NNode != c.expectedNuma || out.IsAligned != c.expectedIsAligned {
 			t.Fatalf("expected alignment: %t:%d ; actual: %t/%d ; CPU set: [%v]", c.expectedIsAligned, c.expectedNuma, out.IsAligned, out.NNode, c.cpuset)

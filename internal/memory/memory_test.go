@@ -3,7 +3,7 @@ package memory
 import (
 	"testing"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 )
 
 func TestCheckAlignmentWith(t *testing.T) {
@@ -30,7 +30,7 @@ func TestCheckAlignmentWith(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		out := NewOutput()
+		out := internal.NewOutput()
 		CheckAlignmentWith(c.memoryNodeString, &out)
 		if out.NNode != c.expectedNuma || out.IsAligned != c.expectedIsAligned {
 			t.Fatalf("expected alignment: %t:%d ; actual: %t/%d ; memory nodes:[%s]", c.expectedIsAligned, c.expectedNuma, out.IsAligned, out.NNode, c.memoryNodeString)
