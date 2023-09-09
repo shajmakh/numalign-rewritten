@@ -18,7 +18,7 @@ package memory
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"strconv"
 	"strings"
 
@@ -36,15 +36,14 @@ func CheckMemoryResourcesAlignment(pid string, output *internal.NumaAlignmentOut
 	if !output.IsAligned {
 		return
 	}
-
-	out, err := exec.Command("cat", fmt.Sprintf("/proc/%s/status", pid)).Output()
+	out, err := os.ReadFile(fmt.Sprintf("/proc/%s/status", pid))
 	if err != nil {
 		output.IsAligned = false
 		output.Err = err
 		return
 	}
 
-	outStr := string(out[:])
+	outStr := string(out)
 
 	match := internal.GetValue(MEMS_ALLOWED_LIST, outStr)
 	if len(match) == 0 {

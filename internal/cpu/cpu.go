@@ -18,7 +18,7 @@ package cpu
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"strings"
 
 	"github.com/shajmakh/numaalign-rewritten/internal"
@@ -31,12 +31,11 @@ const CPUS_ALLOWED_LIST = "Cpus_allowed_list"
 // GetConsumedCpusBy returns the consumed cpuset by a proccess
 func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 	var consumedCpuset cpuset.CPUSet
-	out, err := exec.Command("cat", fmt.Sprintf("/proc/%s/status", pid)).Output()
-
+	out, err := os.ReadFile(fmt.Sprintf("/proc/%s/status", pid))
 	if err != nil {
 		return consumedCpuset, fmt.Errorf("could not get the status of process %s: %v", pid, err)
 	}
-	outStr := string(out[:])
+	outStr := string(out)
 
 	//compile regex and get the matching output
 	match := internal.GetValue(CPUS_ALLOWED_LIST, outStr)

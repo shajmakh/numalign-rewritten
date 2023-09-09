@@ -18,7 +18,7 @@ package numa
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -43,14 +43,27 @@ func GetNumaCount() (int, error) {
 
 // GetNumasList return list of numa nodes names
 func GetNumasList() ([]string, error) {
-	out, err := exec.Command("ls", sysDevicesSystemNodePath).Output()
+	f, err := os.Open(sysDevicesSystemNodePath)
 	if err != nil {
-		return []string{}, fmt.Errorf("failed to list items under %s: %v", sysDevicesSystemNodePath, err)
+		return nil, fmt.Errorf("failed to open %s: %v", sysDevicesSystemNodePath, err)
+	}
+	files, err := f.Readdir(0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list items under %s: %v", sysDevicesSystemNodePath, err)
 	}
 
-	nNodeDirRegex := regexp.MustCompile("node[0-9]*")
-	nnodes := nNodeDirRegex.FindAllString(string(out[:]), -1)
+	re, err := regexp.Compile("node[0-9]*")
+	if err != nil {
+		return nil, err
+	}
 
+	nnodes := []string{}
+	for _, f := range files {
+		match := re.MatchString(f.Name())
+		if match {
+			nnodes = append(nnodes, f.Name())
+		}
+	}
 	return nnodes, nil
 }
 
@@ -66,12 +79,12 @@ func GetNumaCpuMapping() (map[int]cpuset.CPUSet, error) {
 	for idx, nnode := range nnodes {
 		nnodePath := filepath.Join(sysDevicesSystemNodePath, nnode)
 		cpuListPath := filepath.Join(nnodePath, "cpulist")
-		out, err := exec.Command("cat", cpuListPath).Output()
+		out, err := os.ReadFile(cpuListPath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to list items under %s: %v", cpuListPath, err)
+			return nil, fmt.Errorf("failed to get content of %s: %v", cpuListPath, err)
 		}
 
-		numaToCpu[idx], err = cpuset.Parse(strings.TrimSpace(string(out[:])))
+		numaToCpu[idx], err = cpuset.Parse(strings.TrimSpace(string(out)))
 		if err != nil {
 			return nil, fmt.Errorf("could not parse numa cpuset: %v", err)
 		}
@@ -88,28 +101,32 @@ func GetNumaDeviceMapping() (map[string]int, error) {
 	}
 	numaToPci := make(map[string]int, numaCount)
 
-	out, err := exec.Command("ls", sysBusPciDevicePath).Output()
+	f, err := os.Open(sysBusPciDevicePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open %s: %v", sysBusPciDevicePath, err)
+	}
+	devicesNames, err := f.Readdir(0)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list items under %s: %v", sysBusPciDevicePath, err)
 	}
-	devicesNames := strings.Fields(string(out[:]))
-	for _, dName := range devicesNames {
-		dPath := filepath.Join(sysBusPciDevicePath, dName)
+
+	for _, d := range devicesNames {
+		dPath := filepath.Join(sysBusPciDevicePath, d.Name())
 		numaPath := filepath.Join(dPath, "numa_node")
-		out, err := exec.Command("cat", numaPath).Output()
+		out, err := os.ReadFile(numaPath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get numa node of pci device %s: %v", dName, err)
+			return nil, fmt.Errorf("failed to get numa node of pci device %s: %v", d.Name(), err)
 		}
-		nnode, err := strconv.Atoi(string(out[:]))
+		nnode, err := strconv.Atoi(string(out))
 		if err != nil {
-			return nil, fmt.Errorf("could not parse numa of pci device %s: %v", dName, err)
+			return nil, fmt.Errorf("could not parse numa of pci device %s: %v", d.Name(), err)
 		}
 
 		if nnode == -1 {
 			continue
 		}
 
-		numaToPci[dName] = nnode
+		numaToPci[d.Name()] = nnode
 	}
 
 	return numaToPci, nil
