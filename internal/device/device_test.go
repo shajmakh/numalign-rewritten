@@ -3,7 +3,7 @@ package device
 import (
 	"testing"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 )
 
 func TestCheckPciDevicesAlignment(t *testing.T) {
@@ -41,7 +41,7 @@ func TestCheckPciDevicesAlignment(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		out := NewOutput()
+		out := internal.NewOutput()
 		CheckPciDeviceToNumaMapping(c.testMap, c.devList, &out)
 		if out.NNode != c.expectedNuma || out.IsAligned != c.expectedIsAligned {
 			t.Fatalf("expected alignment: %t:%d ; actual: %t/%d ; devices list: [%v]", c.expectedIsAligned, c.expectedNuma, out.IsAligned, out.NNode, c.devList)

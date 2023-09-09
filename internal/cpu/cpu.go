@@ -18,10 +18,10 @@ package cpu
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"strings"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
@@ -31,15 +31,14 @@ const CPUS_ALLOWED_LIST = "Cpus_allowed_list"
 // GetConsumedCpusBy returns the consumed cpuset by a proccess
 func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 	var consumedCpuset cpuset.CPUSet
-	out, err := exec.Command("cat", fmt.Sprintf("/proc/%s/status", pid)).Output()
-
+	out, err := os.ReadFile(fmt.Sprintf("/proc/%s/status", pid))
 	if err != nil {
 		return consumedCpuset, fmt.Errorf("could not get the status of process %s: %v", pid, err)
 	}
-	outStr := string(out[:])
+	outStr := string(out)
 
 	//compile regex and get the matching output
-	match := GetValue(CPUS_ALLOWED_LIST, outStr)
+	match := internal.GetValue(CPUS_ALLOWED_LIST, outStr)
 	if len(match) == 0 {
 		return consumedCpuset, fmt.Errorf("value %s not found in %s", CPUS_ALLOWED_LIST, outStr)
 	}
@@ -51,7 +50,7 @@ func GetConsumedCpusBy(pid string) (cpuset.CPUSet, error) {
 }
 
 // CheckCpuAlignment checks if cpus consumed by a process are aligned to a single numa node
-func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
+func CheckCpuAlignment(pid string, output *internal.NumaAlignmentOutput) {
 	numaToCpuset, err := numa.GetNumaCpuMapping()
 	if err != nil {
 		output.IsAligned = false
@@ -71,7 +70,7 @@ func CheckCpuAlignment(pid string, output *NumaAlignmentOutput) {
 }
 
 // CheckNumaCpuMapping checks if a cpuset is mapped to a numa and returns that numa
-func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpuset.CPUSet, output *NumaAlignmentOutput) {
+func CheckNumaCpuMapping(numaToCpuset map[int]cpuset.CPUSet, consumedCpuset cpuset.CPUSet, output *internal.NumaAlignmentOutput) {
 	if !output.IsAligned {
 		return
 	}

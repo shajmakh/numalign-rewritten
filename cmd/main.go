@@ -23,7 +23,7 @@ import (
 	"os"
 	"strings"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 	"github.com/shajmakh/numaalign-rewritten/internal/cpu"
 	"github.com/shajmakh/numaalign-rewritten/internal/device"
 	"github.com/shajmakh/numaalign-rewritten/internal/memory"
@@ -46,30 +46,30 @@ func main() {
 			log.Fatalf("error opening %s: %v\n", *outputFilePath, err)
 		}
 		defer f.Close()
-		OutputDest = f
+		internal.OutputDest = f
 	}
 
-	Verbose = *verbose
+	internal.Verbose = *verbose
 
 	processId := "self"
 	if strings.TrimSpace(*pid) != "" {
 		processId = strings.Fields(*pid)[0]
 	}
 
-	output := NewOutput()
+	output := internal.NewOutput()
 
 	nNodeCount, err := numa.GetNumaCount()
 	if err != nil {
 		log.Fatal(err) //TODO vs .Fatalf("%v",err)
 	}
 
-	if Verbose {
-		WriteToDest(fmt.Sprintf("Numa count on system is: %d", nNodeCount))
+	if internal.Verbose {
+		internal.WriteToDest(fmt.Sprintf("Numa count on system is: %d", nNodeCount))
 	}
 
 	if nNodeCount == 1 {
 		output.NNode = 0
-		LogNumaAlignment(output)
+		internal.LogNumaAlignment(output)
 		os.Exit(0)
 	}
 
@@ -79,7 +79,7 @@ func main() {
 
 	memory.CheckMemoryResourcesAlignment(processId, &output)
 
-	LogNumaAlignment(output)
+	internal.LogNumaAlignment(output)
 
 	if !output.IsAligned {
 		os.Exit(-1)

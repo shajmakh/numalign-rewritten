@@ -5,12 +5,12 @@ import (
 	"os"
 	"strings"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 	"github.com/shajmakh/numaalign-rewritten/pkg/numa"
 )
 
 // CheckPciDevicesAlignment checks alignment to numa node of the PCI devices used by the process. The expected used devices are fetched from environment variable DEV_RESOURCES
-func CheckPciDevicesAlignment(out *NumaAlignmentOutput) {
+func CheckPciDevicesAlignment(out *internal.NumaAlignmentOutput) {
 	requestedDevs := parseDevicesFromEnv()
 	if len(requestedDevs) == 0 {
 		return
@@ -30,7 +30,7 @@ CheckPciDeviceToNumaMapping updates "out" with the alignment result of device re
 If out.NNode is not -1 it compares the numa of the devices with that numa and if numas are not the same it
 updates "out" with un-alignment info --> IsAligned: false; NNode:-1
 */
-func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string, out *NumaAlignmentOutput) {
+func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string, out *internal.NumaAlignmentOutput) {
 	if !out.IsAligned {
 		return
 	}
@@ -47,8 +47,8 @@ func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string,
 			if nnode != out.NNode {
 				out.NNode = -1
 				out.IsAligned = false
-				if Verbose {
-					WriteToDest(fmt.Sprintf("resources used by the process are not aligned to a single numa: PCI device %q\n", devName))
+				if internal.Verbose {
+					internal.WriteToDest(fmt.Sprintf("resources used by the process are not aligned to a single numa: PCI device %q\n", devName))
 				}
 				return
 			}
@@ -59,8 +59,8 @@ func CheckPciDeviceToNumaMapping(deviceNumaMap map[string]int, devList []string,
 func parseDevicesFromEnv() []string {
 	devStr, ok := os.LookupEnv("DEV_RESOURCES")
 	if !ok {
-		if Verbose {
-			WriteToDest("no pci devices used")
+		if internal.Verbose {
+			internal.WriteToDest("no pci devices used")
 		}
 		return []string{}
 	}

@@ -18,11 +18,11 @@ package memory
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
 	"strconv"
 	"strings"
 
-	. "github.com/shajmakh/numaalign-rewritten/internal"
+	"github.com/shajmakh/numaalign-rewritten/internal"
 	"k8s.io/kubernetes/pkg/kubelet/cm/cpuset"
 )
 
@@ -32,21 +32,20 @@ const MEMS_ALLOWED_LIST = "Mems_allowed_list"
 CheckMemoryResourcesAlignment checks if memory obtained by the process of the passed pid is from a single
 numa and is matching output.NNode if previous resources are aligned.
 */
-func CheckMemoryResourcesAlignment(pid string, output *NumaAlignmentOutput) {
+func CheckMemoryResourcesAlignment(pid string, output *internal.NumaAlignmentOutput) {
 	if !output.IsAligned {
 		return
 	}
-
-	out, err := exec.Command("cat", fmt.Sprintf("/proc/%s/status", pid)).Output()
+	out, err := os.ReadFile(fmt.Sprintf("/proc/%s/status", pid))
 	if err != nil {
 		output.IsAligned = false
 		output.Err = err
 		return
 	}
 
-	outStr := string(out[:])
+	outStr := string(out)
 
-	match := GetValue(MEMS_ALLOWED_LIST, outStr)
+	match := internal.GetValue(MEMS_ALLOWED_LIST, outStr)
 	if len(match) == 0 {
 		output.IsAligned = false
 		output.Err = fmt.Errorf("value %s not found in %s", MEMS_ALLOWED_LIST, outStr)
@@ -59,7 +58,7 @@ func CheckMemoryResourcesAlignment(pid string, output *NumaAlignmentOutput) {
 CheckAlignmentWith Updates "output" with the alignment details after checking if the memSr points
 to a single numa and is aligned with output.NNode.
 */
-func CheckAlignmentWith(memStr string, output *NumaAlignmentOutput) {
+func CheckAlignmentWith(memStr string, output *internal.NumaAlignmentOutput) {
 	if !output.IsAligned {
 		return
 	}
