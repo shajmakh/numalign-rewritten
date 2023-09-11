@@ -9,7 +9,7 @@ gofmt:
 
 .PHONY: build
 build: 
-	go build -o ./build/numalign ./cmd/main.go
+	CGO_ENABLED=0 go build -o ./build/numalign ./cmd/main.go
 
 .PHONY: deps-update
 deps-update:
@@ -18,4 +18,4 @@ deps-update:
 
 .PHONY: tests
 tests: 
-	go test -v ./...
+	CGO_ENABLED=0 go test -v ./...
