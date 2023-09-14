@@ -23,5 +23,5 @@ jobs:
     - name: Build & push the Docker image
       uses: actions/checkout@v3
       run: |
-      docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s) # change this to latest
-      docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
+        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s) # change this to latest
+        docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
