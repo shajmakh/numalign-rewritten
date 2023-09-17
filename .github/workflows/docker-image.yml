@@ -21,7 +21,9 @@ jobs:
         password: ${{ secrets.QUAY_PW }}
         
     - uses: actions/checkout@v3
+      with:
+        context: .
     - name: Build & push the Docker image
       run: |
-        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s) # change this to latest
+        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
         docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
