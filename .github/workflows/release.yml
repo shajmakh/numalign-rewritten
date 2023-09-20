@@ -2,7 +2,7 @@ name: release an image to quay
 
 on:
   pull_request:
-    branches: ["enhancements"]
+    branches: ["main"]
 
 jobs:
   deploy:
