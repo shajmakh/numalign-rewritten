@@ -16,7 +16,7 @@ RUN make tests
 RUN make 
 
 # Copy the current directory contents into the container 
-COPY build/numalign numalign
+COPY ./build/numalign numalign
 
 ENTRYPOINT ["/bin/sh"]
 
