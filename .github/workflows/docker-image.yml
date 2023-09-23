@@ -2,9 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "enhancements" ]
 
 jobs:
 
@@ -25,5 +23,5 @@ jobs:
         context: .
     - name: Build & push the Docker image
       run: |
-        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
-        docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
+        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten
+        docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten
