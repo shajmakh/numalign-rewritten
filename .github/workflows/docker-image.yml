@@ -2,9 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "enhancements" ]
 
 jobs:
 
@@ -20,8 +18,10 @@ jobs:
         username: ${{ secrets.QUAY_ID }}
         password: ${{ secrets.QUAY_PW }}
         
+    - uses: actions/checkout@v2
+      with:
+        context: .
     - name: Build & push the Docker image
-      uses: actions/checkout@v3
       run: |
-        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s) # change this to latest
-        docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten/numalign:$(date +%s)
+        docker build . --tag quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten
+        docker push quay.io/${{ secrets.QUAY_ID }}/numalign-rewritten
